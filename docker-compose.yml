@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - COINMARKETCAP_API_KEY=efe45785c9e84a15af535bffd0fbd58d
+      - BEACONCHAIN_API_KEY=rCeTw2oFMPITIfmwNCBSfprSngylqAOeSPoTCjHIHL3
+      - ETHERSCAN_API_KEY=J6NVRA3AUZR27GRKY99WMIJNNSRGVZIENU
+    restart: unless-stopped

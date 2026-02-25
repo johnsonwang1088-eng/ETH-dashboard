@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ETH Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const MarketInfo = () => {
+      const [data, setData] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+
+      const fetchData = async () => {
+        try {
+          setLoading(true);
+          const response = await fetch('/api/eth/market');
+          if (!response.ok) throw new Error('Failed to fetch market data');
+          const result = await response.json();
+          setData(result);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      useEffect(() => {
+        fetchData();
+      }, []);
+
+      if (loading) return <div className="bg-white rounded-lg p-4 shadow">Loading market data...</div>;
+      if (error) return <div className="bg-white rounded-lg p-4 shadow text-red-600">Error: {error}</div>;
+      if (!data) return <div className="bg-white rounded-lg p-4 shadow">No data available</div>;
+
+      return (
+        <div className="bg-white rounded-lg p-4 shadow">
+          <h2 className="text-xl font-bold mb-4">Market Info</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="border p-3 rounded">
+              <div className="text-sm text-gray-500">Price</div>
+              <div className="text-lg font-semibold">${data.price}</div>
+            </div>
+            <div className="border p-3 rounded">
+              <div className="text-sm text-gray-500">Market Cap</div>
+              <div className="text-lg font-semibold">{data.marketCap}</div>
+            </div>
+            <div className="border p-3 rounded">
+              <div className="text-sm text-gray-500">Circulating Supply</div>
+              <div className="text-lg font-semibold">{data.circulatingSupply}</div>
+            </div>
+            <div className="border p-3 rounded">
+              <div className="text-sm text-gray-500">24h Volume</div>
+              <div className="text-lg font-semibold">{data.volume24h}</div>
+            </div>
+            <div className="border p-3 rounded col-span-2">
+              <div className="text-sm text-gray-500">Market Dominance</div>
+              <div className="text-lg font-semibold">{data.marketDominance}</div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const ETHFundamental = () => {
+      const [data, setData] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+
+      const fetchData = async () => {
+        try {
+          setLoading(true);
+          const response = await fetch('/api/eth/fundamental');
+          if (!response.ok) throw new Error('Failed to fetch fundamental data');
+          const result = await response.json();
+          setData(result);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      useEffect(() => {
+        fetchData();
+      }, []);
+
+      if (loading) return <div className="bg-white rounded-lg p-4 shadow">Loading fundamental data...</div>;
+      if (error) return <div className="bg-white rounded-lg p-4 shadow text-red-600">Error: {error}</div>;
+      if (!data) return <div className="bg-white rounded-lg p-4 shadow">No data available</div>;
+
+      return (
+        <div className="bg-white rounded-lg p-4 shadow">
+          <h2 className="text-xl font-bold mb-4">ETH Fundamental</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="border rounded p-3">
+              <h3 className="font-semibold mb-2">Beaconchain</h3>
+              <div className="space-y-2 text-sm">
+                <div>Staked ETH: <span className="font-semibold">{data.beaconchain.stakedETH}</span></div>
+                <div>Joining Queue: <span className="font-semibold">{data.beaconchain.joiningQueue}</span></div>
+                <div>Leaving Queue: <span className="font-semibold">{data.beaconchain.leavingQueue}</span></div>
+                <div>Epoch: <span className="font-semibold">{data.beaconchain.epoch}</span></div>
+                <div>Slot: <span className="font-semibold">{data.beaconchain.slot}</span></div>
+              </div>
+            </div>
+            <div className="border rounded p-3">
+              <h3 className="font-semibold mb-2">Ultrasound Money</h3>
+              <div className="space-y-2 text-sm">
+                <div>Supply Change: <span className="font-semibold">{data.ultrasound.supplyChange}</span></div>
+                <div>Burned (7d): <span className="font-semibold">{data.ultrasound.burned7d}</span></div>
+                <div>Issued (7d): <span className="font-semibold">{data.ultrasound.issued7d}</span></div>
+                <div>Supply Growth: <span className="font-semibold">{data.ultrasound.supplyGrowth}</span></div>
+                <div>Blob Fee Burn: <span className="font-semibold">{data.ultrasound.blobFeeBurn}</span></div>
+              </div>
+            </div>
+            <div className="border rounded p-3">
+              <h3 className="font-semibold mb-2">L2Beat Value Secured</h3>
+              <div className="text-lg font-semibold">{data.l2beat.valueSecured}</div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const XTrending = () => {
+      const [data, setData] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+
+      const fetchData = async () => {
+        try {
+          setLoading(true);
+          const response = await fetch('/api/eth/trending');
+          if (!response.ok) throw new Error('Failed to fetch trending data');
+          const result = await response.json();
+          setData(result);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      useEffect(() => {
+        fetchData();
+      }, []);
+
+      if (loading) return <div className="bg-white rounded-lg p-4 shadow">Loading trending topics...</div>;
+      if (error) return <div className="bg-white rounded-lg p-4 shadow text-red-600">Error: {error}</div>;
+      if (!data || data.length === 0) return <div className="bg-white rounded-lg p-4 shadow">No data available</div>;
+
+      return (
+        <div className="bg-white rounded-lg p-4 shadow">
+          <h2 className="text-xl font-bold mb-4">X.com 热点话题</h2>
+          <div className="space-y-3">
+            {data.map((item, index) => (
+              <div key={index} className="border rounded p-3">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-semibold text-blue-600 hover:underline cursor-pointer" 
+                      title={item.title}
+                      onClick={() => window.open(item.link, '_blank')}>
+                    {item.title}
+                  </h3>
+                  {item.specialUser && (
+                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      {item.specialUser}
+                    </span>
+                  )}
+                </div>
+                <p className="text-gray-600 text-sm mb-2">{item.snippet}</p>
+                <div className="flex items-center text-xs text-gray-500">
+                  <span>{item.date}</span>
+                  <a 
+                    href={item.link} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="ml-2 text-blue-500 hover:underline"
+                  >
+                    查看原文 →
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    const Scan8004Info = () => {
+      const [data, setData] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+
+      const fetchData = async () => {
+        try {
+          setLoading(true);
+          const response = await fetch('/api/eth/scan8004');
+          if (!response.ok) throw new Error('Failed to fetch Scan8004 data');
+          const result = await response.json();
+          setData(result);
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      useEffect(() => {
+        fetchData();
+      }, []);
+
+      if (loading) return <div className="bg-white rounded-lg p-4 shadow">Loading Scan8004 data...</div>;
+      if (error) return <div className="bg-white rounded-lg p-4 shadow text-red-600">Error: {error}</div>;
+      if (!data) return <div className="bg-white rounded-lg p-4 shadow">No data available</div>;
+
+      return (
+        <div className="bg-white rounded-lg p-4 shadow">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">8004scan.io 数据</h2>
+            <button
+              onClick={fetchData}
+              className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+            >
+              刷新
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="border p-4 rounded text-center">
+              <div className="text-2xl font-bold text-blue-600">{parseInt(data.registeredAgents).toLocaleString()}</div>
+              <div className="text-sm text-gray-500">Registered Agents</div>
+            </div>
+            <div className="border p-4 rounded text-center">
+              <div className="text-2xl font-bold text-green-600">{parseInt(data.feedbackSubmitted).toLocaleString()}</div>
+              <div className="text-sm text-gray-500">Feedback Submitted</div>
+            </div>
+            <div className="border p-4 rounded text-center">
+              <div className="text-2xl font-bold text-purple-600">{parseInt(data.activeUsers).toLocaleString()}</div>
+              <div className="text-sm text-gray-500">Active Users</div>
+            </div>
+          </div>
+          <div className="mt-4 text-xs text-gray-400">
+            数据来源: 8004scan.io API
+          </div>
+        </div>
+      );
+    };
+
+    const Dashboard = () => {
+      const [lastUpdate, setLastUpdate] = useState(null);
+      const [loading, setLoading] = useState(false);
+
+      const refreshData = () => {
+        setLoading(true);
+        setLastUpdate(new Date().toLocaleTimeString());
+        window.location.reload();
+      };
+
+      useEffect(() => {
+        setLastUpdate(new Date().toLocaleTimeString());
+        
+        const interval = setInterval(() => {
+          console.log('Auto refreshing data...');
+          window.location.reload();
+        }, 900000);
+
+        return () => clearInterval(interval);
+      }, []);
+
+      return (
+        <div className="min-h-screen bg-gray-100 p-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-3xl font-bold text-gray-800">Ethereum Dashboard</h1>
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-gray-600">
+                  Last update: {lastUpdate}
+                </span>
+                <button
+                  onClick={refreshData}
+                  disabled={loading}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+                >
+                  {loading ? 'Refreshing...' : 'Refresh'}
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="lg:col-span-1">
+                <MarketInfo />
+              </div>
+              <div className="lg:col-span-1">
+                <ETHFundamental />
+              </div>
+              <div className="lg:col-span-2">
+                <Scan8004Info />
+              </div>
+              <div className="lg:col-span-2">
+                <XTrending />
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const { createRoot } = ReactDOM;
+    createRoot(document.getElementById('root')).render(<Dashboard />);
+  </script>
+</body>
+</html>
