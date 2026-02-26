@@ -74,37 +74,22 @@ class Scan8004Service {
         throw new Error('Invalid API response structure');
       }
 
-      let totalAgents = 0;
-      let totalFeedbacks = 0;
-      
-      data.chain_stats.forEach(chain => {
-        totalAgents += chain.total_agents || 0;
-        totalFeedbacks += chain.total_feedbacks || 0;
-      });
+      const totalAgents = data.total_agents || 0;
+      const totalUsers = data.total_users || 0;
+      const totalFeedbacks = data.total_feedbacks || 0;
 
-      const activeUsers = this.calculateActiveUsers(data);
-
-      console.log(`API数据提取: Registered=${totalAgents}, Feedback=${totalFeedbacks}, Active=${activeUsers}`);
+      console.log(`API数据提取: Registered=${totalAgents}, Feedback=${totalFeedbacks}, Active Users=${totalUsers}`);
       
       return {
         registeredAgents: totalAgents.toString(),
         feedbackSubmitted: totalFeedbacks.toString(),
-        activeUsers: activeUsers.toString()
+        activeUsers: totalUsers.toString()
       };
       
     } catch (error) {
       console.log('API request failed:', error.message);
       throw error;
     }
-  }
-
-  calculateActiveUsers(data) {
-    const totalAgents = parseInt(data.chain_stats?.reduce((sum, c) => sum + (c.total_agents || 0), 0) || 0);
-    const totalFeedbacks = parseInt(data.chain_stats?.reduce((sum, c) => sum + (c.total_feedbacks || 0), 0) || 0);
-    
-    const estimatedActive = Math.floor(totalAgents * 0.76);
-    
-    return Math.max(totalFeedbacks - 179, estimatedActive);
   }
 
   isValidData(data) {
