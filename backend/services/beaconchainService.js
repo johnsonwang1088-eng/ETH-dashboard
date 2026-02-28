@@ -1,25 +1,60 @@
-import axios from 'axios';
+import puppeteer from 'puppeteer';
 
 class BeaconchainService {
-  constructor() {
-    this.apiKey = 'rCeTw2oFMPITIfmwNCBSfprSngylqAOeSPoTCjHIHL3';
-    this.baseUrl = 'https://beaconcha.in/api/v1';
-  }
-
   async getBeaconchainData() {
-    
+    let browser;
     try {
-      const [epochData, slotData] = await Promise.all([
-        this.getEpochData(),
-        this.getSlotData()
-      ]);
+      browser = await puppeteer.launch({
+        headless: 'new',
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
+
+      const page = await browser.newPage();
+      
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+      
+      await page.goto('https://beaconcha.in', {
+        waitUntil: 'networkidle2',
+        timeout: 30000
+      });
+
+      await new Promise(resolve => setTimeout(resolve, 5000));
+
+      const data = await page.evaluate(() => {
+        const mainText = document.body.innerText;
+        
+        const result = {};
+        
+        const epochMatch = mainText.match(/Epoch\s+(\d{6})/);
+        if (epochMatch) {
+          result.epoch = parseInt(epochMatch[1]);
+        }
+
+        const slotMatch = mainText.match(/Slot\s+(\d{8})/);
+        if (slotMatch) {
+          result.slot = parseInt(slotMatch[1]);
+        }
+
+        const stakedMatch = mainText.match(/Staked\s+ETH\s+([\d,]+)\s+ETH/);
+        if (stakedMatch) {
+          result.stakedETH = parseInt(stakedMatch[1].replace(/,/g, ''));
+        }
+
+        const joiningLeavingMatch = mainText.match(/Joining\s+\/\s+Leaving\s+(\d+)K\s+\/\s+(\d+)K/);
+        if (joiningLeavingMatch) {
+          result.joining = parseInt(joiningLeavingMatch[1]) * 1000;
+          result.leaving = parseInt(joiningLeavingMatch[2]) * 1000;
+        }
+
+        return result;
+      });
 
       return {
-        stakedETH: this.formatNumber(epochData?.totalvalidatorbalance || 0),
-        joiningQueue: this.formatNumber(epochData?.gval || 0),
-        leavingQueue: this.formatNumber(epochData?.vval || 0),
-        epoch: this.formatNumber(epochData?.epoch || 0),
-        slot: this.formatNumber(slotData?.slot || 0)
+        stakedETH: this.formatNumber(data.stakedETH || 0),
+        joiningQueue: this.formatNumber(data.joining || 0),
+        leavingQueue: this.formatNumber(data.leaving || 0),
+        epoch: (data.epoch || 0).toString(),
+        slot: (data.slot || 0).toString()
       };
     } catch (error) {
       console.error('Error fetching Beaconchain data:', error.message);
@@ -30,40 +65,10 @@ class BeaconchainService {
         epoch: '0',
         slot: '0'
       };
-    }
-  }
-
-  async getEpochData() {
-    
-    try {
-      const response = await axios.get(`${this.baseUrl}/epoch/latest`, {
-        headers: {
-          'API-KEY': this.apiKey
-        },
-        timeout: 10000
-      });
-
-      return response.data?.data;
-    } catch (error) {
-      console.error('Error fetching epoch data:', error.message);
-      return null;
-    }
-  }
-
-  async getSlotData() {
-    
-    try {
-      const response = await axios.get(`${this.baseUrl}/slot/latest`, {
-        headers: {
-          'API-KEY': this.apiKey
-        },
-        timeout: 10000
-      });
-
-      return response.data?.data;
-    } catch (error) {
-      console.error('Error fetching slot data:', error.message);
-      return null;
+    } finally {
+      if (browser) {
+        await browser.close();
+      }
     }
   }
 

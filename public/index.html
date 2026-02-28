@@ -78,11 +78,24 @@
       const fetchData = async () => {
         try {
           setLoading(true);
+          setError(null);
+          console.log('[ETHFundamental] Fetching data...');
+          
           const response = await fetch('/api/eth/fundamental');
-          if (!response.ok) throw new Error('Failed to fetch fundamental data');
+          console.log('[ETHFundamental] Response status:', response.status);
+          
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('[ETHFundamental] Response error:', errorText);
+            throw new Error(`Failed to fetch fundamental data: ${response.status} ${response.statusText}`);
+          }
+          
           const result = await response.json();
+          console.log('[ETHFundamental] Data received:', result);
+          
           setData(result);
         } catch (err) {
+          console.error('[ETHFundamental] Error:', err);
           setError(err.message);
         } finally {
           setLoading(false);
@@ -118,12 +131,22 @@
                 <div>Burned (7d): <span className="font-semibold">{data.ultrasound.burned7d}</span></div>
                 <div>Issued (7d): <span className="font-semibold">{data.ultrasound.issued7d}</span></div>
                 <div>Supply Growth: <span className="font-semibold">{data.ultrasound.supplyGrowth}</span></div>
-                <div>Blob Fee Burn: <span className="font-semibold">{data.ultrasound.blobFeeBurn}</span></div>
+                <div>Blob Fee Burn (7d): <span className="font-semibold">{data.ultrasound['blobFeeBurn(7d)']}</span></div>
               </div>
             </div>
-            <div className="border rounded p-3">
-              <h3 className="font-semibold mb-2">L2Beat Value Secured</h3>
-              <div className="text-lg font-semibold">{data.l2beat.valueSecured}</div>
+            <div className="grid grid-cols-3 gap-4 md:col-span-2">
+              <div className="border rounded p-3">
+                <h3 className="font-semibold mb-2">L2Beat Value Secured</h3>
+                <div className="text-lg font-semibold">{data.l2beat.valueSecured}</div>
+              </div>
+              <div className="border rounded p-3">
+                <h3 className="font-semibold mb-2">Total Value Locked in DeFi</h3>
+                <div className="text-lg font-semibold">{data.defillama.tvlInDeFi}</div>
+              </div>
+              <div className="border rounded p-3">
+                <h3 className="font-semibold mb-2">Average Gas</h3>
+                <div className="text-lg font-semibold">{data.gas.averageGasPrice}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -223,15 +246,7 @@
 
       return (
         <div className="bg-white rounded-lg p-4 shadow">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">8004scan.io 数据</h2>
-            <button
-              onClick={fetchData}
-              className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-            >
-              刷新
-            </button>
-          </div>
+          <h2 className="text-xl font-bold mb-4">8004scan.io</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="border p-4 rounded text-center">
               <div className="text-2xl font-bold text-blue-600">{parseInt(data.registeredAgents).toLocaleString()}</div>
@@ -245,9 +260,6 @@
               <div className="text-2xl font-bold text-purple-600">{parseInt(data.activeUsers).toLocaleString()}</div>
               <div className="text-sm text-gray-500">Active Users</div>
             </div>
-          </div>
-          <div className="mt-4 text-xs text-gray-400">
-            数据来源: 8004scan.io API
           </div>
         </div>
       );

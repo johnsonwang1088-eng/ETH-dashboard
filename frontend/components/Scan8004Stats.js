@@ -29,15 +29,7 @@ const Scan8004Stats = () => {
 
   return (
     <div className="bg-white rounded-lg p-4 shadow">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">8004scan.io 统计数据</h2>
-        <button
-          onClick={fetchData}
-          className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-        >
-          刷新
-        </button>
-      </div>
+      <h2 className="text-xl font-bold mb-4">8004scan.io</h2>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="border p-4 rounded">
           <div className="text-sm text-gray-500 mb-1">Registered Agents</div>
@@ -57,9 +49,6 @@ const Scan8004Stats = () => {
             {parseInt(data.activeUsers).toLocaleString()}
           </div>
         </div>
-      </div>
-      <div className="mt-4 text-xs text-gray-400">
-        数据来源: 8004scan.io API
       </div>
     </div>
   );

@@ -51,9 +51,19 @@ const ETHFundamental = () => {
             <div>Blob Fee Burn: <span className="font-semibold">{data.ultrasound.blobFeeBurn}</span></div>
           </div>
         </div>
-        <div className="border rounded p-3">
-          <h3 className="font-semibold mb-2">L2Beat Value Secured</h3>
-          <div className="text-lg font-semibold">{data.l2beat.valueSecured}</div>
+        <div className="grid grid-cols-3 gap-4 md:col-span-2">
+          <div className="border rounded p-3">
+            <h3 className="font-semibold mb-2">L2Beat Value Secured</h3>
+            <div className="text-lg font-semibold">{data.l2beat.valueSecured}</div>
+          </div>
+          <div className="border rounded p-3">
+            <h3 className="font-semibold mb-2">Total Value Locked in DeFi</h3>
+            <div className="text-lg font-semibold">{data.defillama.tvl}</div>
+          </div>
+          <div className="border rounded p-3">
+            <h3 className="font-semibold mb-2">Average Gas</h3>
+            <div className="text-lg font-semibold">{data.gas.averageGasPrice}</div>
+          </div>
         </div>
       </div>
     </div>

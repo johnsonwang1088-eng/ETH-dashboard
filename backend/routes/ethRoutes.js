@@ -6,6 +6,7 @@ import ultrasoundService from '../services/ultrasoundService.js';
 import l2beatService from '../services/l2beatService.js';
 import googleSearchService from '../services/googleSearchService.js';
 import scan8004Service from '../services/scan8004Service.js';
+import defillamaService from '../services/defillamaService.js';
 
 const router = express.Router();
 
@@ -20,16 +21,20 @@ router.get('/market', async (req, res) => {
 
 router.get('/fundamental', async (req, res) => {
   try {
-    const [beaconchain, ultrasound, l2beat] = await Promise.all([
+    const [beaconchain, ultrasound, l2beat, defillama, gasData] = await Promise.all([
       beaconchainService.getBeaconchainData(),
       ultrasoundService.getSupplyData(),
-      l2beatService.getL2Data()
+      l2beatService.getL2Data(),
+      defillamaService.getChainTvl(),
+      etherscanService.getGasData()
     ]);
 
     res.json({
       beaconchain,
       ultrasound,
-      l2beat
+      l2beat,
+      defillama,
+      gas: gasData
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
