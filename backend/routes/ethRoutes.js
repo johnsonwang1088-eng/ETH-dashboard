@@ -4,9 +4,9 @@ import beaconchainService from '../services/beaconchainService.js';
 import etherscanService from '../services/etherscanService.js';
 import ultrasoundService from '../services/ultrasoundService.js';
 import l2beatService from '../services/l2beatService.js';
-import googleSearchService from '../services/googleSearchService.js';
 import scan8004Service from '../services/scan8004Service.js';
 import defillamaService from '../services/defillamaService.js';
+import googleSearchService from '../services/googleSearchService.js';
 
 const router = express.Router();
 
@@ -71,6 +71,23 @@ router.get('/scan8004', async (req, res) => {
     const data = await scan8004Service.getScan8004Data();
     res.json(data);
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/news', async (req, res) => {
+  try {
+    const { num = 30 } = req.query;
+    console.log('=== /api/eth/news called ===');
+    console.log('num:', num);
+    const queries = ['"Ethereum"', '"以太坊"', '"ETH"', '"Vitalik"', '"Tom lee"', '"8004"', '"x402"'];
+    console.log('queries:', queries);
+    const results = await googleSearchService.searchMultipleQueries(queries, parseInt(num));
+    console.log('Results returned:', results.length);
+    console.log('First result:', results[0]);
+    res.json({ results });
+  } catch (error) {
+    console.error('Error in /api/eth/news:', error);
     res.status(500).json({ error: error.message });
   }
 });

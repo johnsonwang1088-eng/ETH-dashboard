@@ -31,7 +31,7 @@ async function testUltrasoundScraping() {
     ]);
     
     console.log('Waiting for content to load...');
-    await setTimeout(5000);
+    await setTimeout(10000);
     
     const data = await page.evaluate(() => {
       const result = {};
@@ -42,7 +42,7 @@ async function testUltrasoundScraping() {
         result.burnTotal = burnTotalMatch[1];
       }
       
-      const burned7dMatch = bodyText.match(/burn total\s+([\d.,]+)/i);
+      const burned7dMatch = bodyText.match(/burned.*7d\s*[:=]?\s*([\d.,]+\s*eth)/i);
       if (burned7dMatch) {
         result.burned7d = burned7dMatch[1];
       }
@@ -72,9 +72,9 @@ async function testUltrasoundScraping() {
         result.feeBurn = feeBurnMatch[1];
       }
       
-      const issuedMatch = bodyText.match(/issued\s+([\d.,]+)/i);
+      const issuedMatch = bodyText.match(/issued.*7d\s*[:=]?\s*([\d.,]+\s*eth)/i);
       if (issuedMatch) {
-        result.issued = issuedMatch[1];
+        result.issued7d = issuedMatch[1];
       }
       
       const issuanceMatch = bodyText.match(/issuance\s+([\d.,]+)/i);

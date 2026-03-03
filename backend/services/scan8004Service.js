@@ -70,20 +70,20 @@ class Scan8004Service {
 
       const data = response.data;
       
-      if (!data || !data.chain_stats) {
+      if (!data) {
         throw new Error('Invalid API response structure');
       }
 
-      const totalAgents = data.total_agents || 0;
-      const totalUsers = data.total_users || 0;
-      const totalFeedbacks = data.total_feedbacks || 0;
+      const totalRegistrations = data.registration_stats?.total || 0;
+      const totalAgents = data.chain_stats?.reduce((sum, chain) => sum + (chain.total_agents || 0), 0) || 0;
+      const totalFeedbacks = data.chain_stats?.reduce((sum, chain) => sum + (chain.total_feedbacks || 0), 0) || 0;
 
-      console.log(`API数据提取: Registered=${totalAgents}, Feedback=${totalFeedbacks}, Active Users=${totalUsers}`);
+      console.log(`API数据提取: Registered=${totalRegistrations}, Feedback=${totalFeedbacks}, Active Users=${totalAgents}`);
       
       return {
-        registeredAgents: totalAgents.toString(),
+        registeredAgents: totalRegistrations.toString(),
         feedbackSubmitted: totalFeedbacks.toString(),
-        activeUsers: totalUsers.toString()
+        activeUsers: totalAgents.toString()
       };
       
     } catch (error) {
@@ -93,14 +93,17 @@ class Scan8004Service {
   }
 
   isValidData(data) {
+    const minValidRegistrations = 100;
+    const minValidFeedbacks = 1000;
     const minValidAgents = 10000;
+    
     const registeredAgents = parseInt(data.registeredAgents) || 0;
     const feedbackSubmitted = parseInt(data.feedbackSubmitted) || 0;
     const activeUsers = parseInt(data.activeUsers) || 0;
 
-    return registeredAgents >= minValidAgents && 
-           feedbackSubmitted >= 100 && 
-           activeUsers >= 100;
+    return registeredAgents >= minValidRegistrations && 
+           feedbackSubmitted >= minValidFeedbacks && 
+           activeUsers >= minValidAgents;
   }
 
   formatNumber(number) {
