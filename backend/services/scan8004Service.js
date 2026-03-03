@@ -74,16 +74,21 @@ class Scan8004Service {
         throw new Error('Invalid API response structure');
       }
 
-      const totalRegistrations = data.registration_stats?.total || 0;
       const totalAgents = data.chain_stats?.reduce((sum, chain) => sum + (chain.total_agents || 0), 0) || 0;
       const totalFeedbacks = data.chain_stats?.reduce((sum, chain) => sum + (chain.total_feedbacks || 0), 0) || 0;
+      
+      const excludedChainNames = ['MegaETH', 'Gnosis', 'Celo', 'Metis Andromeda', 'Mantle', 'Abstract'];
+      const excludedAgents = data.chain_stats
+        ?.filter(c => excludedChainNames.includes(c.name))
+        ?.reduce((sum, chain) => sum + (chain.total_agents || 0), 0) || 0;
+      const activeUsers = totalAgents - excludedAgents;
 
-      console.log(`API数据提取: Registered=${totalRegistrations}, Feedback=${totalFeedbacks}, Active Users=${totalAgents}`);
+      console.log(`API数据提取: Registered=${totalAgents}, Feedback=${totalFeedbacks}, Active Users=${activeUsers} (排除: ${excludedAgents})`);
       
       return {
-        registeredAgents: totalRegistrations.toString(),
+        registeredAgents: totalAgents.toString(),
         feedbackSubmitted: totalFeedbacks.toString(),
-        activeUsers: totalAgents.toString()
+        activeUsers: activeUsers.toString()
       };
       
     } catch (error) {
