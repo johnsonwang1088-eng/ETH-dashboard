@@ -76,19 +76,14 @@ class Scan8004Service {
 
       const totalAgents = data.chain_stats?.reduce((sum, chain) => sum + (chain.total_agents || 0), 0) || 0;
       const totalFeedbacks = data.chain_stats?.reduce((sum, chain) => sum + (chain.total_feedbacks || 0), 0) || 0;
-      
-      const excludedChainNames = ['MegaETH', 'Gnosis', 'Celo', 'Metis Andromeda', 'Mantle', 'Abstract'];
-      const excludedAgents = data.chain_stats
-        ?.filter(c => excludedChainNames.includes(c.name))
-        ?.reduce((sum, chain) => sum + (chain.total_agents || 0), 0) || 0;
-      const activeUsers = totalAgents - excludedAgents;
+      const totalUsers = data.total_users || 0;
 
-      console.log(`API数据提取: Registered=${totalAgents}, Feedback=${totalFeedbacks}, Active Users=${activeUsers} (排除: ${excludedAgents})`);
+      console.log(`API数据提取: Registered=${totalAgents}, Feedback=${totalFeedbacks}, Active Users=${totalUsers}`);
       
       return {
         registeredAgents: totalAgents.toString(),
         feedbackSubmitted: totalFeedbacks.toString(),
-        activeUsers: activeUsers.toString()
+        activeUsers: totalUsers.toString()
       };
       
     } catch (error) {
