@@ -13,7 +13,7 @@ class BeaconchainService {
       
       await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
       
-      await page.goto('https://beaconcha.in', {
+      await page.goto('https://beaconcha.in/explorer', {
         waitUntil: 'networkidle2',
         timeout: 30000
       });
@@ -25,22 +25,22 @@ class BeaconchainService {
         
         const result = {};
         
-        const epochMatch = mainText.match(/Epoch\s+(\d{6})/);
+        const epochMatch = mainText.match(/Epoch\s+([\d,]+)/);
         if (epochMatch) {
-          result.epoch = parseInt(epochMatch[1]);
+          result.epoch = parseInt(epochMatch[1].replace(/,/g, ''));
         }
 
-        const slotMatch = mainText.match(/Slot\s+(\d{8})/);
+        const slotMatch = mainText.match(/Slot\s+([\d,]+)/);
         if (slotMatch) {
-          result.slot = parseInt(slotMatch[1]);
+          result.slot = parseInt(slotMatch[1].replace(/,/g, ''));
         }
 
-        const stakedMatch = mainText.match(/Staked\s+ETH\s+([\d,]+)\s+ETH/);
+        const stakedMatch = mainText.match(/STAKED\s+ETH\s+([\d,]+)/);
         if (stakedMatch) {
           result.stakedETH = parseInt(stakedMatch[1].replace(/,/g, ''));
         }
 
-        const joiningLeavingMatch = mainText.match(/Joining\s+\/\s+Leaving\s+(\d+)K\s+\/\s+(\d+)K/);
+        const joiningLeavingMatch = mainText.match(/(\d+)K\s*\/\s*(\d+)K/);
         if (joiningLeavingMatch) {
           result.joining = parseInt(joiningLeavingMatch[1]) * 1000;
           result.leaving = parseInt(joiningLeavingMatch[2]) * 1000;
