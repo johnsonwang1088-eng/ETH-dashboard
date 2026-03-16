@@ -18,32 +18,35 @@ class BeaconchainService {
         timeout: 30000
       });
 
-      await new Promise(resolve => setTimeout(resolve, 5000));
+      await new Promise(resolve => setTimeout(resolve, 10000));
 
       const data = await page.evaluate(() => {
-        const mainText = document.body.innerText;
-        
         const result = {};
+        // Get the whole text to be safe
+        const text = document.body.innerText.replace(/\s+/g, ' ');
         
-        const epochMatch = mainText.match(/Epoch\s+([\d,]+)/);
-        if (epochMatch) {
-          result.epoch = parseInt(epochMatch[1].replace(/,/g, ''));
-        }
+        // Use case-insensitive regex to be more robust
+        const epochMatch = text.match(/EPOCH\s*([\d,]+)/i);
+        if (epochMatch) result.epoch = parseInt(epochMatch[1].replace(/,/g, ''));
 
-        const slotMatch = mainText.match(/Slot\s+([\d,]+)/);
-        if (slotMatch) {
-          result.slot = parseInt(slotMatch[1].replace(/,/g, ''));
-        }
+        const slotMatch = text.match(/SLOT\s*([\d,]+)/i);
+        if (slotMatch) result.slot = parseInt(slotMatch[1].replace(/,/g, ''));
 
-        const stakedMatch = mainText.match(/STAKED\s+ETH\s+([\d,]+)/);
-        if (stakedMatch) {
-          result.stakedETH = parseInt(stakedMatch[1].replace(/,/g, ''));
-        }
+        // Specifically look for STAKED ETH followed by the number
+        const stakedMatch = text.match(/STAKED\s*ETH\s*([\d,]+)/i);
+        if (stakedMatch) result.stakedETH = parseInt(stakedMatch[1].replace(/,/g, ''));
 
-        const joiningLeavingMatch = mainText.match(/(\d+)K\s*\/\s*(\d+)K/);
-        if (joiningLeavingMatch) {
-          result.joining = parseInt(joiningLeavingMatch[1]) * 1000;
-          result.leaving = parseInt(joiningLeavingMatch[2]) * 1000;
+        // Parse JOINING / LEAVING which might look like "3026K / 32"
+        const queueMatch = text.match(/JOINING\s*\/\s*LEAVING\s*([\d,K]+)\s*\/\s*([\d,K]+)/i);
+        if (queueMatch) {
+          const parseQueueValue = (val) => {
+            if (val.toUpperCase().endsWith('K')) {
+              return parseFloat(val.replace(/K/i, '')) * 1000;
+            }
+            return parseInt(val.replace(/,/g, ''));
+          };
+          result.joining = parseQueueValue(queueMatch[1]);
+          result.leaving = parseQueueValue(queueMatch[2]);
         }
 
         return result;
